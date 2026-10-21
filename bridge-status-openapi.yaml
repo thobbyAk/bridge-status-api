@@ -1,0 +1,83 @@
+openapi: 3.0.3
+info:
+  title: Bridge Transfer Status API
+  version: 1.0.0
+  description: >
+    Returns the status of BTC L1 to L2 bridge transfers and lets clients
+    request the proof needed to complete a transfer. Consumed by the bridge
+    frontend.
+servers:
+  - url: https://api.example.com
+paths:
+  /transfers/{id}:
+    get:
+      summary: Get a bridge transfer by ID
+      operationId: getTransfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: tx_7f3a
+      responses:
+        '200':
+          description: The transfer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transfer'
+  /proofs:
+    post:
+      summary: Request a proof for a transfer
+      operationId: createProof
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [transferId]
+              properties:
+                transferId:
+                  type: string
+                  example: tx_7f3a
+      responses:
+        '201':
+          description: Proof created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [proofId, status]
+                properties:
+                  proofId:
+                    type: string
+                    example: prf_22b1
+                  status:
+                    type: string
+                    example: created
+components:
+  schemas:
+    Transfer:
+      type: object
+      required: [id, amountSats, confirmations, status]
+      properties:
+        id:
+          type: string
+          example: tx_7f3a
+        amountSats:
+          type: integer
+          description: Amount in satoshis
+          example: 150000
+        confirmations:
+          type: integer
+          description: Number of Bitcoin confirmations so far
+          example: 3
+        status:
+          type: string
+          enum: [pending, confirming, completed, failed]
+          example: confirming
+        l2Address:
+          type: string
+          example: '0x9a3F4b2C8d1E6f7A0b5C3d2E1f4A6b8C9d0E1f2A'
